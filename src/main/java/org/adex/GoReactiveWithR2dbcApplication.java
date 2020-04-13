@@ -13,11 +13,8 @@ import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePop
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.data.relational.core.query.CriteriaDefinition;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -31,7 +28,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -87,10 +83,8 @@ class RequestHandlerFaçade {
 
 @Component
 @RequiredArgsConstructor
-@Log4j2
 class Runner {
 
-	private final UserRepository dao;
 	private final UserDao userDao;
 
 	@EventListener(ApplicationReadyEvent.class)
@@ -98,7 +92,6 @@ class Runner {
 		this.userDao.deleteAll()
 				.thenMany(
 						Flux.just("Med", "John", "Maria").map(name -> new User(null, name)).flatMap(this.userDao::save));
-		this.userDao.getAll().subscribe(log::info);
 	}
 
 }
@@ -143,7 +136,6 @@ class UserDao {
 	}
 
 	private static User maptoUser(Map<String, Object> data) {
-		System.out.println(data);
 		return User.builder().id((Integer) data.get("id")).name(data.get("name").toString()).build();
 	}
 }
