@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -83,15 +84,15 @@ class RequestHandlerFaçade {
 
 @Component
 @RequiredArgsConstructor
+@Log4j2
 class Runner {
 
-	private final UserDao userDao;
+	private final UserRepository dao;
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void init() {
-		this.userDao.deleteAll()
-				.thenMany(
-						Flux.just("Med", "John", "Maria").map(name -> new User(null, name)).flatMap(this.userDao::save));
+		var saved = Flux.just("Med", "John", "Maria").map(name -> new User(null, name)).flatMap(this.dao::save);
+		this.dao.deleteAll().thenMany(saved).thenMany(this.dao.findAll()).subscribe(log::info);
 	}
 
 }
